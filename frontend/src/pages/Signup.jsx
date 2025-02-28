@@ -6,9 +6,13 @@ import { MdDriveFileRenameOutline } from "react-icons/md";
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import { FaHome } from "react-icons/fa";
+import { useSignupMutation } from "../services/ApiService";
 
 const SignUp = () => {
   const navigate = useNavigate();
+
+  const [signup, { isLoading }] = useSignupMutation();
+
   const initialValues = {
     name: "",
     contact_number: "",
@@ -16,7 +20,7 @@ const SignUp = () => {
     email: "",
     password: "",
   };
-   
+
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     contact_number: Yup.string()
@@ -35,12 +39,26 @@ const SignUp = () => {
       .required("Password is required"),
   });
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    
-    console.log(values);
-    setSubmitting(false);
+  const handleSubmit = async (values, { setSubmitting, setStatus }) => {
+    try {
+      const result = await signup(values).unwrap();
+      console.log("Signup successful:", result);
+
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+      }
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Signup failed:", error);
+      setStatus({
+        error:
+          error.data?.message || "Failed to create account. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
-  
+
   return (
     <div className="flex items-center justify-center h-screen bg-white">
       <div className="w-full max-w-md bg-white p-8 rounded-lg ">
@@ -138,7 +156,7 @@ const SignUp = () => {
                 disabled={isSubmitting}
                 className="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Sign in
+                {isSubmitting || isLoading ? "Signing up..." : "Sign up"}
               </button>
             </Form>
           )}
