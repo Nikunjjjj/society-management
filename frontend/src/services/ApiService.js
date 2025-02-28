@@ -1,20 +1,23 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const someApi = createApi({
-  reducerPath: "someApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://192.168.0.102:3000/" }),
+  reducerPath: 'someApi',
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: 'https://your-api-url.com/api/' 
+  }),
+
   endpoints: (builder) => ({
     signup: builder.mutation({
-      query: (userdata) => ({
-        url: "signup",
-        method: "POST",
-        body: userdata,
+      query: (userData) => ({
+        url: 'signup',
+        method: 'POST',
+        body: userData,
       }),
     }),
     login: builder.mutation({
       query: (credentials) => ({
-        url: "",
-        method: "POST",
+        url: 'login',
+        method: 'POST',
         body: credentials,
       }),
     }),

@@ -2,8 +2,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { IoLockClosedSharp } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { useLoginMutation } from "../services/ApiService";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [login] = useLoginMutation();
+
   const initialValues = {
     email: "",
     password: "",
@@ -18,10 +23,24 @@ const Login = () => {
       .required("Password is required"),
   });
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    // Perform login or sign-up logic here
-    console.log(values);
-    setSubmitting(false);
+  const handleSubmit = async (values, { setSubmitting, setStatus }) => {
+    try {
+      const result = await login(values).unwrap();
+      console.log("result", result);
+
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+      }
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Signup failed:", error);
+      setStatus({
+        error:
+          error.data?.message || "Failed to create account. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
   return (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -75,7 +94,7 @@ const Login = () => {
                 disabled={isSubmitting}
                 className="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Sign in
+                Login
               </button>
             </Form>
           )}
