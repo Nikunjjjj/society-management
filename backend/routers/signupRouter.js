@@ -1,5 +1,5 @@
 const express = require('express');
-<<<<<<< Updated upstream
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');  // ✅ Correct spelling
@@ -8,9 +8,10 @@ const secretKey = crypto.createHash('sha256').update(String('your-secret-key')).
 
 const router = express.Router();
 
-router.get('/signup', async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
         const body = req.body;
+        console.log(body)
         if (!body) {
             return res.status(400).json({
                 success: false,
@@ -40,23 +41,6 @@ router.get('/signup', async (req, res) => {
             message: 'Signup failed',
         })
     }
-=======
-const mongoose = require('mongoose');  // ✅ Correct spelling
-const PeopleId = require("../models/people.js");
-;
-
-const router = express.Router();
-
-router.post('/signup', (req, res) => {
-    const body = req.body;
-    console.log(body)
-    const people = new PeopleId(body);
-    people.save()
-    res.status(200).json({message:"successful"})
-})
->>>>>>> Stashed changes
-
-
 });
 
 router.post('/login', async (req, res) => {
