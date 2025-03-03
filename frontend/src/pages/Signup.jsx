@@ -46,8 +46,9 @@ const SignUp = () => {
 
       if (result.token) {
         localStorage.setItem("token", result.token);
+        console.log('result.token', result.token)
       }
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       console.error("Signup failed:", error);
       setStatus({

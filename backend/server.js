@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error("MongoDB connection error:", err));
 
-app.use('/api/signup', signupRouter); // Ensure router has a base path
+app.use(signupRouter); // Ensure router has a base path
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);

@@ -1,4 +1,5 @@
 const express = require('express');
+<<<<<<< Updated upstream
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');  // ✅ Correct spelling
@@ -39,6 +40,21 @@ router.get('/signup', async (req, res) => {
             message: 'Signup failed',
         })
     }
+=======
+const mongoose = require('mongoose');  // ✅ Correct spelling
+const PeopleId = require("../models/people.js");
+;
+
+const router = express.Router();
+
+router.post('/signup', (req, res) => {
+    const body = req.body;
+    console.log(body)
+    const people = new PeopleId(body);
+    people.save()
+    res.status(200).json({message:"successful"})
+})
+>>>>>>> Stashed changes
 
 
 });
