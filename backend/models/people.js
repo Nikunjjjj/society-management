@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');  // ✅ Correct spelling
+const { encrypt, decrypt, authenticateToken } = require("../auth/auth.js")
 
 
 const peopleSchema = new mongoose.Schema({
@@ -14,5 +15,7 @@ const peopleSchema = new mongoose.Schema({
 });
 
 const PeopleId = mongoose.model('PeopleId', peopleSchema);
+peopleSchema.set('toObject', { getters: true })
+peopleSchema.set('toJSON', { getters: true })
 
 module.exports = PeopleId;

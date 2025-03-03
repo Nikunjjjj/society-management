@@ -14,5 +14,7 @@ const gardSchema = new mongoose.Schema({
 });
 
 const GardId = mongoose.model('GardId', gardSchema);  // Removed `new`
+userLoginSchema.set('toObject', { getters: true })
+userLoginSchema.set('toJSON', { getters: true })
 
 module.exports = GardId;
