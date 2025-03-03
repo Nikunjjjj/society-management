@@ -18,7 +18,7 @@ router.get('/signup', async (req, res) => {
         }
         const people = new PeopleId(body);
         await people.save()
-        user = await UserLogin.findOne({ email: req.body.email, name: req.body.name });
+        user = await PeopleId.findOne({ email: req.body.email, name: req.body.name });
         if (!user) {
             return res.status(400).json({
                 success: false,
@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
                 error: 'You must provide a body',
             })
         }
-        const user = await UserLogin.findOne({ email: req.body.email, name: req.body.name });
+        const user = await PeopleId.findOne({ email: req.body.email, name: req.body.name });
         if (!user) {
             return res.status(400).json({
                 success: false,
