@@ -12,12 +12,6 @@ const peopleSchema = new mongoose.Schema({
         set: encrypt, // Encrypt the password before saving
         get: decrypt
     },
-    name: String ,
-    contact_number: String,
-    complex_number: String,
-    email: String,
-    password: String,
-
 });
 
 // ✅ Move schema configuration before defining model
