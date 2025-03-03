@@ -1,4 +1,5 @@
 const express = require('express');
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');  // ✅ Correct spelling
@@ -10,6 +11,7 @@ const router = express.Router();
 router.post('/signup', async (req, res) => {
     try {
         const body = req.body;
+        console.log(body)
         if (!body) {
 
             return res.status(400).json({
@@ -40,8 +42,6 @@ router.post('/signup', async (req, res) => {
             message: 'Signup failed',
         })
     }
-
-
 });
 
 router.post('/login', async (req, res) => {
