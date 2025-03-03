@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');  // ✅ Correct spelling
-const { encrypt, decrypt, authenticateToken } = require("../auth/auth.js")
-
+const { encrypt, decrypt, authenticateToken } = require("../auth/auth.js");  // ✅ Ensure auth.js exists
 
 const peopleSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -14,8 +13,10 @@ const peopleSchema = new mongoose.Schema({
     },
 });
 
+// ✅ Move schema configuration before defining model
+peopleSchema.set('toObject', { getters: true });
+peopleSchema.set('toJSON', { getters: true });
+
 const PeopleId = mongoose.model('PeopleId', peopleSchema);
-peopleSchema.set('toObject', { getters: true })
-peopleSchema.set('toJSON', { getters: true })
 
 module.exports = PeopleId;
