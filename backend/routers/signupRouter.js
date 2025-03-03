@@ -7,10 +7,11 @@ const secretKey = crypto.createHash('sha256').update(String('your-secret-key')).
 
 const router = express.Router();
 
-router.get('/signup', async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
         const body = req.body;
         if (!body) {
+
             return res.status(400).json({
                 success: false,
                 error: 'You must provide a body',
