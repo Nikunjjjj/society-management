@@ -11,6 +11,7 @@ const router = express.Router();
 router.post('/signup', async (req, res) => {
     try {
         const { name, email, password, contact_number, complex_number } = req.body;
+        console.log(req.body);
 
         // Check for missing fields
         if (!name || !email || !password || !contact_number || !complex_number) {
