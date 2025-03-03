@@ -1,7 +1,7 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { IoLockClosedSharp } from "react-icons/io5";
-import { MdEmail } from "react-icons/md";
+import { FaPhoneAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../services/ApiService";
 
@@ -10,14 +10,16 @@ const Login = () => {
   const [login] = useLoginMutation();
 
   const initialValues = {
-    email: "",
+    Mobile_number: "",
     password: "",
   };
 
   const validationSchema = Yup.object().shape({
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
+    Mobile_number: Yup.string()
+      .matches(/^[0-9]+$/, "Contact number must be numeric")
+      .min(10, "Contact number must be at least 10 digits")
+      .max(15, "Contact number cannot exceed 15 digits")
+      .required("Contact number is required"),
     password: Yup.string()
       .min(8, "Password must be at least 8 characters long")
       .required("Password is required"),
@@ -59,17 +61,17 @@ const Login = () => {
         >
           {({ isSubmitting }) => (
             <Form className="space-y-4">
-              <div className="relative email">
-                <MdEmail className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+              <div className="relative contact numer">
+                <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
                 <Field
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="Email"
+                  type="contact_number"
+                  id="contact_number"
+                  name="contact_number"
+                  placeholder="Mobile Number"
                   className="w-full border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500 pl-10 py-2 border-b"
                 />
                 <ErrorMessage
-                  name="email"
+                  name="contact_number"
                   component="div"
                   className="text-red-500 text-sm mt-1"
                 />
@@ -99,6 +101,17 @@ const Login = () => {
             </Form>
           )}
         </Formik>
+        <div className="text-center mt-6 text-lg">
+          <p className="text-gray-700 cursor-pointer">
+            Don&lsquo;t have an account?
+            <a
+              onClick={() => navigate("/signup")}
+              className="text-blue-500 hover:underline"
+            >
+              Sign Up
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
