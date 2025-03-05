@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { IoLockClosedSharp } from "react-icons/io5";
@@ -15,9 +16,12 @@ import { Tag } from "primereact/tag";
 const SignUp = () => {
   const navigate = useNavigate();
   const [signup, { isLoading }] = useSignupMutation();
-  const [logoPreview, setlogoPreview] = useState(null);
-  const [showTable, setshowTable] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [showTable, setShowTable] = useState(false);
   const [societyMembers, setSocietyMembers] = useState([]);
+  const [designation, setDesignation] = useState(null);
+  const [formValues, setFormValues] = useState(null);
+  const [status, setStatus] = useState({ error: null });
 
   const initialValues = {
     society_name: "",
@@ -56,33 +60,60 @@ const SignUp = () => {
       .required("Password is required"),
   });
 
-  const handleSubmit = async (values, { resetForm }) => {
-    const formData = new FormData();
-
-    formData.append("society_name", values.society_name);
-    formData.append("society_address", values.society_address);
-    if (values.society_logo) {
-      formData.append("society_logo", values.society_logo);
-    } else {
-      formData.append("society_logo", "");
-    }
-    formData.append("builder_name", values.builder_name);
-    formData.append("builder_number", values.builder_number);
-    formData.append("society_admin_name", values.society_admin_name);
-    formData.append("society_admin_number", values.society_admin_number);
-    formData.append("society_admin_password", values.society_admin_password);
+  const handleSubmit = async (values) => {
+    setFormValues(values);
 
     const memberObject = {
       id: societyMembers.length + 1,
       society_admin_name: values.society_admin_name,
       society_admin_number: values.society_admin_number,
-      designation: "Society Admin",
+      designation: designation ?? "Society admin",
     };
 
-    setshowTable(true);
+    setShowTable(true);
     setSocietyMembers([...societyMembers, memberObject]);
-    resetForm();
+  };  
+
+  const handleProceed = async () => {
+    if (!formValues) {
+      setStatus({ error: "Form data is missing. Please fill out the form." });
+      return;
+    }
+
+    const payload = [
+      {
+        society_name: formValues.society_name,
+        society_address: formValues.society_address,
+        society_logo: formValues.society_logo ? formValues.society_logo : "",
+        builder_name: formValues.builder_name,
+        builder_number: formValues.builder_number,
+        society_admin_name: formValues.society_admin_name,
+        society_admin_number: formValues.society_admin_number,
+        society_admin_password: formValues.society_admin_password,
+        society_members: societyMembers, 
+      },
+    ];
+
+    console.log('payload', payload)
+    
+    // try {
+    //   const result = await signup(payload).unwrap();
+    //   console.log("Signup successful:", result);
+
+    //   if (result.token) {
+    //     localStorage.setItem("token", result.token);
+    //   }
+    //   navigate("/login");
+    // } catch (error) {
+    //   console.error("Signup failed:", error);
+    //   setStatus({
+    //     error:
+    //       error.data?.message || "Failed to create account. Please try again.",
+    //   });
+    // }
+
   };
+
   const [statuses] = useState([
     "SOCIETY ADMIN",
     "MEMBER",
@@ -115,6 +146,7 @@ const SignUp = () => {
     _members[index] = newData;
 
     setSocietyMembers(_members);
+    setDesignation(_members.map((item) => item.designation));
   };
 
   const textEditor = (options) => {
@@ -212,7 +244,7 @@ const SignUp = () => {
                     onChange={(e) => {
                       const file = e.target.files[0] || null;
                       setFieldValue("society_logo", file);
-                      setlogoPreview(file ? URL.createObjectURL(file) : null);
+                      setLogoPreview(file ? URL.createObjectURL(file) : null);
                     }}
                     className="w-full border-gray-300 rounded-md p-2 border-b"
                   />
@@ -373,7 +405,7 @@ const SignUp = () => {
               Add More
             </button>
           </div>
-          <div className="fixed bottom-4 right-4">
+          <div onClick={handleProceed} className="fixed bottom-4 right-4">
             <button className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600">
               Proceed
             </button>
@@ -385,68 +417,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-
-/* {showTable && (
-        <div >
-          <Table striped bordered hover className="w-full">
-            <thead>
-              <tr className="bg-gray-200 text-gray-700">
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Designation</th>
-                <th className="px-4 py-2">Mobile</th>
-                <th className="px-4 py-2">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {societyMembers.map((member, index) => {
-                const memberObject = Object.fromEntries(member.entries());
-
-                return (
-                  <tr
-                    key={index}
-                    className="bg-white hover:bg-gray-100 transition-colors duration-300"
-                  >
-                    <td className="px-4 py-2">{index + 1}</td>
-                    <td className="px-4 py-2">
-                      {memberObject.society_admin_name || "N/A"}
-                    </td>
-                    <td className="px-4 py-2">Society Admin</td>
-                    <td className="px-4 py-2">
-                      {memberObject.society_admin_number || "N/A"}
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        onClick={() =>
-                          console.log("Edit clicked for", memberObject)
-                        }
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </div>
-      )} */
-
-// try {
-//   const result = await signup(formData).unwrap();
-//   console.log("Signup successful:", result);
-
-//   if (result.token) {
-//     localStorage.setItem("token", result.token);
-//   }
-//   navigate("/login");
-// } catch (error) {
-//   console.error("Signup failed:", error);
-//   setStatus({
-//     error:
-//       error.data?.message || "Failed to create account. Please try again.",
-//   });
-// } finally {
-//   setSubmitting(false);
-// }
