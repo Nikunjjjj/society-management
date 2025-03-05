@@ -72,7 +72,7 @@ const SignUp = () => {
 
     setShowTable(true);
     setSocietyMembers([...societyMembers, memberObject]);
-  };  
+  };
 
   const handleProceed = async () => {
     if (!formValues) {
@@ -90,28 +90,27 @@ const SignUp = () => {
         society_admin_name: formValues.society_admin_name,
         society_admin_number: formValues.society_admin_number,
         society_admin_password: formValues.society_admin_password,
-        society_members: societyMembers, 
+        society_members: societyMembers,
       },
     ];
 
-    console.log('payload', payload)
-    
-    // try {
-    //   const result = await signup(payload).unwrap();
-    //   console.log("Signup successful:", result);
+    console.log("payload", payload);
 
-    //   if (result.token) {
-    //     localStorage.setItem("token", result.token);
-    //   }
-    //   navigate("/login");
-    // } catch (error) {
-    //   console.error("Signup failed:", error);
-    //   setStatus({
-    //     error:
-    //       error.data?.message || "Failed to create account. Please try again.",
-    //   });
-    // }
+    try {
+      const result = await signup(payload).unwrap();
+      console.log("Signup successful:", result);
 
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+      }
+      navigate("/login");
+    } catch (error) {
+      console.error("Signup failed:", error);
+      setStatus({
+        error:
+          error.data?.message || "Failed to create account. Please try again.",
+      });
+    }
   };
 
   const [statuses] = useState([
