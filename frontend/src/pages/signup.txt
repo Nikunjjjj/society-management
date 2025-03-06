@@ -11,8 +11,8 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import { Password } from "primereact/password";
 import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -23,8 +23,7 @@ const SignUp = () => {
   const [designation, setDesignation] = useState(null);
   const [formValues, setFormValues] = useState(null);
   const [status, setStatus] = useState({ error: null });
-  const [showAddMore, setshowAddMore] = useState(false);
-  const [selectedDesignation, setSelectedDesignation] = useState(null);
+  const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
 
   const initialValues = {
     society_name: "",
@@ -37,10 +36,10 @@ const SignUp = () => {
     society_admin_password: "",
   };
 
-  const initialValuesOfMembers = {
+  const addMemberInitialValues = {
     name: "",
     designation: "",
-    mobile_no: "",
+    mobile_number: "",
     password: "",
   };
 
@@ -70,10 +69,10 @@ const SignUp = () => {
       .required("Password is required"),
   });
 
-  const validationSchemaOfMembers = Yup.object().shape({
+  const addMemberValidationSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
-    designation: Yup.string(),
-    mobile_no: Yup.string()
+    designation: Yup.string().required("Designation is required"),
+    mobile_number: Yup.string()
       .matches(/^[0-9]+$/, "Contact number must be numeric")
       .min(10, "Must be at least 10 digits")
       .max(15, "Cannot exceed 15 digits")
@@ -84,7 +83,6 @@ const SignUp = () => {
   });
 
   const handleSubmit = (values) => {
-    
     setFormValues(values);
 
     const memberObject = {
@@ -99,24 +97,27 @@ const SignUp = () => {
     setSocietyMembers([...societyMembers, memberObject]);
   };
 
-  const handleSubmitOfMembers = (values, { resetForm }) => {
-    const object = {
+  const handleAddMember = (values, { resetForm }) => {
+    const newMember = {
       id: societyMembers.length + 1,
       society_admin_name: values.name,
-      society_admin_number: values.mobile_no,
-      designation: selectedDesignation,
+      society_admin_number: values.mobile_number,
+      designation: values.designation,
       password: values.password,
     };
 
-    setSocietyMembers([...societyMembers, object]);
-    setshowAddMore(false);
+    setSocietyMembers([...societyMembers, newMember]);
+    setShowAddMemberDialog(false);
     resetForm();
   };
 
   const handleProceed = async () => {
+    if (!formValues) {
+      setStatus({ error: "Form data is missing. Please fill out the form." });
+      return;
+    }
 
-    const formattedMembers = societyMembers.map((member, index) => ({
-      id: index,
+    const formattedMembers = societyMembers.map(member => ({
       name: member.society_admin_name,
       mobile_number: member.society_admin_number,
       designation: member.designation,
@@ -134,13 +135,13 @@ const SignUp = () => {
         society_admin_number: formValues.society_admin_number,
         society_admin_password: formValues.society_admin_password,
         society_members: formattedMembers,
-        designation: designation || "Society Admin",
+        designation: designation || "Society Admin"
       },
     ];
-    debugger;
 
     try {
       const result = await signup(payload).unwrap();
+      
       console.log("Signup successful:", result);
 
       if (result.token) {
@@ -212,7 +213,7 @@ const SignUp = () => {
         options={statuses}
         onChange={(e) => options.editorCallback(e.value)}
         placeholder="Select a Status"
-        disabled={options.rowData.designation === "Society Admin"}
+        disabled={options.rowData.designation === 'Society Admin'}
         itemTemplate={(option) => {
           return <Tag value={option} severity={getSeverity(option)} />;
         }}
@@ -225,23 +226,23 @@ const SignUp = () => {
       <Tag
         value={rowData.designation}
         severity={getSeverity(rowData.designation)}
-        disabled={rowData.designation === "Society Admin"}
       />
     );
   };
 
   const allowEdit = (rowData) => {
-    return rowData.name !== "Blue Band";
+    return rowData.designation !== "Society Admin";
   };
 
   const footerContent = (
     <div>
-      <Button
-        label="Cancel"
-        icon="pi pi-check"
-        onClick={() => setshowAddMore(false)}
-        autoFocus
-      />
+      <button 
+        type="button" 
+        className="bg-gray-300 text-gray-700 font-medium py-2 px-4 mr-2 rounded-md hover:bg-gray-400"
+        onClick={() => setShowAddMemberDialog(false)}
+      >
+        Cancel
+      </button>
     </div>
   );
 
@@ -427,7 +428,7 @@ const SignUp = () => {
 
       {showTable && (
         <>
-          <div className="card">
+          <div className="card w-full max-w-4xl">
             <DataTable
               value={societyMembers}
               editMode="row"
@@ -439,20 +440,20 @@ const SignUp = () => {
                 field="society_admin_name"
                 header="Name"
                 editor={(options) => textEditor(options)}
-                style={{ width: "20%" }}
+                style={{ width: "30%" }}
               />
               <Column
                 field="designation"
                 header="Designation"
                 body={statusBodyTemplate}
                 editor={(options) => statusEditor(options)}
-                style={{ width: "20%" }}
+                style={{ width: "30%" }}
               />
               <Column
                 field="society_admin_number"
                 header="Mobile Number"
                 editor={(options) => textEditor(options)}
-                style={{ width: "20%" }}
+                style={{ width: "30%" }}
               />
               <Column
                 rowEditor={allowEdit}
@@ -460,8 +461,8 @@ const SignUp = () => {
                 bodyStyle={{ textAlign: "center" }}
               ></Column>
             </DataTable>
-            <button
-              onClick={() => setshowAddMore(true)}
+            <button 
+              onClick={() => setShowAddMemberDialog(true)} 
               className="text-blue-600 pt-2 ml-3 text-sm hover:underline cursor-pointer"
             >
               Add More
@@ -475,102 +476,100 @@ const SignUp = () => {
         </>
       )}
 
-      <div className="card flex justify-content-center">
-        <Dialog
-          header="Add Society Member"
-          visible={showAddMore}
-          style={{ width: "50vw" }}
-          onHide={() => setshowAddMore(false)}
-          footer={footerContent}
+      <Dialog 
+        header="Add Society Member" 
+        visible={showAddMemberDialog} 
+        style={{ width: '450px' }} 
+        footer={footerContent} 
+        onHide={() => setShowAddMemberDialog(false)}
+      >
+        <Formik
+          initialValues={addMemberInitialValues}
+          validationSchema={addMemberValidationSchema}
+          onSubmit={handleAddMember}
         >
-          <Formik
-            initialValues={initialValuesOfMembers}
-            validationSchema={validationSchemaOfMembers}
-            onSubmit={handleSubmitOfMembers}
-          >
-            {({ isSubmitting, status }) => (
-              <Form className="space-y-4">
-                {/* Member Name */}
-                <div className="relative">
-                  <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="name"
-                    placeholder=" Name"
-                    className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
-                  />
-                  <ErrorMessage
-                    name="name"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+          {({ values, isSubmitting, handleSubmit }) => (
+            <Form className="space-y-4">
+              {/* Name */}
+              <div className="relative">
+                <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                <Field
+                  type="text"
+                  name="name"
+                  placeholder="Member Name"
+                  className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
+                />
+                <ErrorMessage
+                  name="name"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
 
-                {/* Member Designation */}
-                <div className="relative">
-                  <Dropdown
-                    value={selectedDesignation}
-                    onChange={(e) => setSelectedDesignation(e.value)}
-                    options={designationOptions}
-                    optionLabel="label"
-                    placeholder="Select a Designation"
-                    className="w-full md:w-14rem"
-                  />
-                  <ErrorMessage
-                    name="designation"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+              {/* Designation */}
+              <div className="relative">
+                <Field name="designation">
+                  {({ field, form }) => (
+                    <div>
+                      <Dropdown
+                        id="designation"
+                        value={field.value}
+                        options={designationOptions}
+                        onChange={(e) => form.setFieldValue('designation', e.value)}
+                        placeholder="Select Designation"
+                        className="w-full"
+                      />
+                      {form.errors.designation && form.touched.designation && (
+                        <div className="text-red-500 text-sm mt-1">{form.errors.designation}</div>
+                      )}
+                    </div>
+                  )}
+                </Field>
+              </div>
 
-                {/* Member Number */}
-                <div className="relative">
-                  <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="mobile_no"
-                    placeholder=" Contact Number"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="mobile_no"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+              {/* Mobile Number */}
+              <div className="relative">
+                <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                <Field
+                  type="text"
+                  name="mobile_number"
+                  placeholder="Mobile Number"
+                  className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                />
+                <ErrorMessage
+                  name="mobile_number"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
 
-                {/* Member Password */}
-                <div className="relative">
-                  <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+              {/* Password */}
+              <div className="relative">
+                <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                <Field
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                />
+                <ErrorMessage
+                  name="password"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
 
-                {status?.error && (
-                  <div className="text-red-500 text-sm">{status.error}</div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
-                >
-                  Save
-                </button>
-              </Form>
-            )}
-          </Formik>
-        </Dialog>
-      </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
+              >
+                Save
+              </button>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
     </div>
   );
 };
