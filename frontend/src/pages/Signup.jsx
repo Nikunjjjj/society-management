@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { IoLockClosedSharp } from "react-icons/io5";
@@ -137,7 +138,6 @@ const SignUp = () => {
         designation: designation || "Society Admin",
       },
     ];
-    debugger;
 
     try {
       const result = await signup(payload).unwrap();
