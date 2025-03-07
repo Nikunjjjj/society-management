@@ -14,8 +14,8 @@ const admin_data = new mongoose.Schema({
         set: encrypt, // Encrypt the password before saving
         get: decrypt
     },
-    designation: { type: String, required: true },
-    society_members: formattedMembers,
+    designation: { type: String, required: true }
+
 });
 
 // ✅ Move schema configuration before defining model
