@@ -138,10 +138,11 @@ const SignUp = () => {
         society_admin_name: formValues.society_admin_name,
         society_admin_number: formValues.society_admin_number,
         society_admin_password: formValues.society_admin_password,
-        designation: designation || "Society Admin",
+        designation: "Society Admin",
         society_members: formattedMembers,
       },
     ];
+ 
 
     try {
       const result = await signup(payload).unwrap();
