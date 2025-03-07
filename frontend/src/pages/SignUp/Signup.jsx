@@ -5,7 +5,7 @@ import { IoLockClosedSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { MdDriveFileRenameOutline } from "react-icons/md";
 import { FaPhoneAlt, FaHome } from "react-icons/fa";
-import { useSignupMutation } from "../services/ApiService";
+import { useSignupMutation } from "../../services/ApiService";
 import { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -13,7 +13,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
+import { FaHouse } from "react-icons/fa6";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -41,6 +41,7 @@ const SignUp = () => {
   const initialValuesOfMembers = {
     name: "",
     designation: "",
+    house_no: "",
     mobile_no: "",
     password: "",
   };
@@ -74,6 +75,10 @@ const SignUp = () => {
   const validationSchemaOfMembers = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     designation: Yup.string(),
+    house_no: Yup.string().matches(
+      /^[0-9]+$/,
+      "Contact number must be numeric"
+    ),
     mobile_no: Yup.string()
       .matches(/^[0-9]+$/, "Contact number must be numeric")
       .min(10, "Must be at least 10 digits")
@@ -85,7 +90,6 @@ const SignUp = () => {
   });
 
   const handleSubmit = (values) => {
-    
     setFormValues(values);
 
     const memberObject = {
@@ -107,6 +111,7 @@ const SignUp = () => {
       society_admin_number: values.mobile_no,
       designation: selectedDesignation,
       password: values.password,
+      ...(values.house_no ? {house_number: values.house_no}: {})
     };
 
     setSocietyMembers([...societyMembers, object]);
@@ -115,13 +120,12 @@ const SignUp = () => {
   };
 
   const handleProceed = async () => {
-
-    const formattedMembers = societyMembers.map((member, index) => ({
-      id: index,
+    const formattedMembers = societyMembers.map((member) => ({
       name: member.society_admin_name,
       mobile_number: member.society_admin_number,
       designation: member.designation,
       password: member.password,
+      ...(member.house_number? {house_number: member.house_number}: {} )
     }));
 
     const payload = [
@@ -134,8 +138,8 @@ const SignUp = () => {
         society_admin_name: formValues.society_admin_name,
         society_admin_number: formValues.society_admin_number,
         society_admin_password: formValues.society_admin_password,
-        society_members: formattedMembers,
         designation: designation || "Society Admin",
+        society_members: formattedMembers,
       },
     ];
 
@@ -233,17 +237,6 @@ const SignUp = () => {
   const allowEdit = (rowData) => {
     return rowData.name !== "Blue Band";
   };
-
-  const footerContent = (
-    <div>
-      <Button
-        label="Cancel"
-        icon="pi pi-check"
-        onClick={() => setshowAddMore(false)}
-        autoFocus
-      />
-    </div>
-  );
 
   return (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -429,17 +422,21 @@ const SignUp = () => {
         <>
           <div className="card">
             <DataTable
+              stripedRows
               value={societyMembers}
               editMode="row"
               dataKey="id"
               onRowEditComplete={onRowEditComplete}
               tableStyle={{ minWidth: "50rem" }}
+              scrollable
+              scrollHeight="400px"
             >
               <Column
                 field="society_admin_name"
                 header="Name"
                 editor={(options) => textEditor(options)}
                 style={{ width: "20%" }}
+                sortable
               />
               <Column
                 field="designation"
@@ -447,17 +444,20 @@ const SignUp = () => {
                 body={statusBodyTemplate}
                 editor={(options) => statusEditor(options)}
                 style={{ width: "20%" }}
+                sortable
               />
               <Column
                 field="society_admin_number"
                 header="Mobile Number"
                 editor={(options) => textEditor(options)}
                 style={{ width: "20%" }}
+                sortable
               />
               <Column
                 rowEditor={allowEdit}
                 headerStyle={{ width: "10%", minWidth: "8rem" }}
                 bodyStyle={{ textAlign: "center" }}
+                sortable
               ></Column>
             </DataTable>
             <button
@@ -481,7 +481,6 @@ const SignUp = () => {
           visible={showAddMore}
           style={{ width: "50vw" }}
           onHide={() => setshowAddMore(false)}
-          footer={footerContent}
         >
           <Formik
             initialValues={initialValuesOfMembers}
@@ -523,6 +522,24 @@ const SignUp = () => {
                   />
                 </div>
 
+              {/* House Number  */}
+                {selectedDesignation === "HOUSE OWNER" && (
+                  <div className="relative">
+                    <FaHouse className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                    <Field
+                      type="text"
+                      name="house_no"
+                      placeholder=" House/Flat Number"
+                      className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                    />
+                    <ErrorMessage
+                      name="house_no"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                  </div>
+                )}
+
                 {/* Member Number */}
                 <div className="relative">
                   <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
@@ -559,13 +576,16 @@ const SignUp = () => {
                   <div className="text-red-500 text-sm">{status.error}</div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
-                >
-                  Save
-                </button>
+                {/* button */}
+                <div className="text-center">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-10  bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
+                  >
+                    Save
+                  </button>
+                </div>
               </Form>
             )}
           </Formik>
