@@ -111,7 +111,7 @@ const SignUp = () => {
       society_admin_number: values.mobile_no,
       designation: selectedDesignation,
       password: values.password,
-      ...(values.house_no ? {house_number: values.house_no}: {})
+      ...(values.house_no ? { house_number: values.house_no } : {}),
     };
 
     setSocietyMembers([...societyMembers, object]);
@@ -125,23 +125,21 @@ const SignUp = () => {
       mobile_number: member.society_admin_number,
       designation: member.designation,
       password: member.password,
-      ...(member.house_number? {house_number: member.house_number}: {} )
+      ...(member.house_number ? { house_number: member.house_number } : {}),
     }));
 
-    const payload = [
-      {
-        society_name: formValues.society_name,
-        society_address: formValues.society_address,
-        society_logo: formValues.society_logo ? formValues.society_logo : "",
-        builder_name: formValues.builder_name,
-        builder_number: formValues.builder_number,
-        society_admin_name: formValues.society_admin_name,
-        society_admin_number: formValues.society_admin_number,
-        society_admin_password: formValues.society_admin_password,
-        designation: designation || "Society Admin",
-        society_members: formattedMembers,
-      },
-    ];
+    const payload = {
+      society_name: formValues.society_name,
+      society_address: formValues.society_address,
+      society_logo: formValues.society_logo ? formValues.society_logo : "",
+      builder_name: formValues.builder_name,
+      builder_number: formValues.builder_number,
+      society_admin_name: formValues.society_admin_name,
+      society_admin_number: formValues.society_admin_number,
+      society_admin_password: formValues.society_admin_password,
+      designation: designation || "Society Admin",
+      society_members: formattedMembers,
+    };
 
     try {
       const result = await signup(payload).unwrap();
@@ -522,7 +520,7 @@ const SignUp = () => {
                   />
                 </div>
 
-              {/* House Number  */}
+                {/* House Number  */}
                 {selectedDesignation === "HOUSE OWNER" && (
                   <div className="relative">
                     <FaHouse className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
