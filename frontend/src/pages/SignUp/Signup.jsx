@@ -142,7 +142,6 @@ const SignUp = () => {
         society_members: formattedMembers,
       },
     ];
-    debugger;
 
     try {
       const result = await signup(payload).unwrap();
