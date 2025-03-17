@@ -31,6 +31,7 @@ const upload = multer({
 
 
 async function mailVerify(email, token) {
+
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,  // Use 465 for SSL, 587 for TLS
@@ -133,13 +134,11 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
                 await newMember.save();
             }
             console.log("All society members saved successfully.");
-            mailVerify(token, savedAdmin.society_admin_email);
+
 
         } else {
             console.warn("No valid society members found.");
         }
-
-        res.status(201).json({ message: "Signup successful" });
         mailVerify(savedAdmin.society_admin_email, token)
             .then(function (success) {
                 console.log("Email sent successfully:", success.messageId);
@@ -147,6 +146,9 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
             .catch(function (error) {
                 console.error("Email sent failed:", error);
             });
+
+        res.status(201).json({ message: "Signup successful" });
+
 
 
 
