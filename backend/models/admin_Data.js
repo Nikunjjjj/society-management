@@ -1,21 +1,20 @@
 const mongoose = require('mongoose');  // ✅ Correct spelling
-const { encrypt, decrypt, authenticateToken } = require("../auth/auth.js");  // ✅ Ensure auth.js exists
+const { encrypt, decrypt } = require("../auth/auth.js");  // ✅ Ensure auth.js exists
 
 const admin_data = new mongoose.Schema({
-    society_name: { type: String, required: true },
-    society_address: { type: String, required: true },
+    society_name: { type: String },
+    society_address: { type: String },
     society_logo: { type: String },
-    builder_name: { type: String, required: true },
-    builder_number: { type: String, required: true },
-    society_admin_name: { type: String, required: true },
-    society_admin_number: { type: String, required: true },
+    builder_name: { type: String },
+    builder_number: { type: String },
+    society_admin_name: { type: String },
+    society_admin_number: { type: String },
     society_admin_password: {
-        type: String, required: true,
+        type: String,
         set: encrypt, // Encrypt the password before saving
         get: decrypt
     },
-    designation: { type: String, required: true }
-
+    designation: { type: String }
 });
 
 // ✅ Move schema configuration before defining model

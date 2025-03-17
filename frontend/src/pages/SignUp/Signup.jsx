@@ -14,6 +14,8 @@ import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
 import { FaHouse } from "react-icons/fa6";
+import { MdEmail } from "react-icons/md";
+import SignUpImage from "../../assets/SignUpImage.jpg";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -35,12 +37,14 @@ const SignUp = () => {
     builder_number: "",
     society_admin_name: "",
     society_admin_number: "",
+    society_admin_email: "",
     society_admin_password: "",
   };
 
   const initialValuesOfMembers = {
     name: "",
     designation: "",
+    email: "",
     house_no: "",
     mobile_no: "",
     password: "",
@@ -67,6 +71,9 @@ const SignUp = () => {
       .min(10, "Must be at least 10 digits")
       .max(15, "Cannot exceed 15 digits")
       .required("Society admin contact number is required"),
+    society_admin_email: Yup.string()
+      .email("Invalid email address")
+      .required("Society admin email is required"),
     society_admin_password: Yup.string()
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
@@ -75,6 +82,9 @@ const SignUp = () => {
   const validationSchemaOfMembers = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     designation: Yup.string(),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Society admin email is required"),
     house_no: Yup.string().matches(
       /^[0-9]+$/,
       "Contact number must be numeric"
@@ -111,7 +121,8 @@ const SignUp = () => {
       society_admin_number: values.mobile_no,
       designation: selectedDesignation,
       password: values.password,
-      ...(values.house_no ? {house_number: values.house_no}: {})
+      email: values.email,
+      ...(values.house_no ? { house_number: values.house_no } : {}),
     };
 
     setSocietyMembers([...societyMembers, object]);
@@ -119,39 +130,43 @@ const SignUp = () => {
     resetForm();
   };
 
-  const handleProceed = async () => {
-    const formattedMembers = societyMembers.map((member) => ({
-      name: member.society_admin_name,
-      mobile_number: member.society_admin_number,
-      designation: member.designation,
-      password: member.password,
-      ...(member.house_number? {house_number: member.house_number}: {} )
-    }));
+    const handleProceed = async () => {
+      const formData = new FormData();
 
-    const payload = [
-      {
-        society_name: formValues.society_name,
-        society_address: formValues.society_address,
-        society_logo: formValues.society_logo ? formValues.society_logo : "",
-        builder_name: formValues.builder_name,
-        builder_number: formValues.builder_number,
-        society_admin_name: formValues.society_admin_name,
-        society_admin_number: formValues.society_admin_number,
-        society_admin_password: formValues.society_admin_password,
-        designation: "Society Admin",
-        society_members: formattedMembers,
-      },
-    ];
- 
+      if (formValues.society_logo) {
+        formData.append("Society logo", formValues.society_logo);
+      }
+      formData.append("Society name", formValues.society_name);
+      formData.append("Society address", formValues.society_address);
+      formData.append("builder name", formValues.builder_name);
+      formData.append("builder number", formValues.builder_number);
+      formData.append("Society admin name", formValues.society_admin_name);
+      formData.append("Society admin number", formValues.society_admin_number);
+      formData.append("Society admin email", formValues.society_admin_email);
+      formData.append(
+        "Society admin password",
+        formValues.society_admin_password
+      );
+      formData.append("Role", "Society Admin");
+
+      const formattedMembers = societyMembers.slice(1).map((member) => ({
+        name: member.society_admin_name,
+        mobile_number: member.society_admin_number,
+        designation: member.designation,
+        password: member.password,
+        email: member.email,
+        ...(member.house_number ? { house_number: member.house_number } : {}),
+      }));
+      formData.append("society_members", JSON.stringify(formattedMembers));
 
     try {
-      const result = await signup(payload).unwrap();
+      const result = await signup(formData).unwrap();
       console.log("Signup successful:", result);
 
       if (result.token) {
         localStorage.setItem("token", result.token);
       }
-      navigate("/login");
+      navigate("/emailverification");
     } catch (error) {
       console.error("Signup failed:", error);
       setStatus({
@@ -240,357 +255,410 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-white">
-      {!showTable && (
-        <div className="w-full max-w-md bg-white p-8 rounded-lg ">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Sign Up</h1>
-            <h4 className="mb-6 text-gray-700 font-medium">
-              Please enter your details
-            </h4>
+    <div className="flex min-h-screen bg-white">
+      {/* Left side - Image */}
+      <div className="hidden lg:flex lg:w-1/2 bg-blue-50 items-center justify-center">
+        <div className="max-w-md p-8">
+          <img src={SignUpImage} alt="" />
+          <div className="mt-8 text-center">
+            <h2 className="text-2xl font-bold text-blue-800">
+              Welcome to Society Management
+            </h2>
+            <p className="mt-4 text-gray-600">
+              Create your society account and start managing your community
+              efficiently.
+            </p>
           </div>
-
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ values, isSubmitting, setFieldValue, status }) => (
-              <Form className="space-y-4">
-                {/* Society Name */}
-                <div className="relative">
-                  <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="society_name"
-                    placeholder="Society Name"
-                    className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
-                  />
-                  <ErrorMessage
-                    name="society_name"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Society Address */}
-                <div className="relative">
-                  <FaHome className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="society_address"
-                    placeholder="Society Address"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="society_address"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Society Logo */}
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0] || null;
-                      setFieldValue("society_logo", file);
-                      setLogoPreview(file ? URL.createObjectURL(file) : null);
-                    }}
-                    className="w-full border-gray-300 rounded-md p-2 border-b"
-                  />
-
-                  {values.society_logo && (
-                    <p className="mt-1 text-gray-600 text-sm">
-                      {values.society_logo.name}
-                    </p>
-                  )}
-                  {logoPreview && (
-                    <img
-                      src={logoPreview}
-                      alt="Preview"
-                      className="mt-2 h-16 w-16 object-cover rounded"
-                    />
-                  )}
-
-                  <ErrorMessage
-                    name="society_logo"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Builder Name */}
-                <div className="relative">
-                  <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="builder_name"
-                    placeholder="Builder Name"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="builder_name"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Builder Number */}
-                <div className="relative">
-                  <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="builder_number"
-                    placeholder="Builder Contact Number"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="builder_number"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Society Admin Name */}
-                <div className="relative">
-                  <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="society_admin_name"
-                    placeholder="Society Admin name"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="society_admin_name"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Society Admin Number */}
-                <div className="relative">
-                  <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="society_admin_number"
-                    placeholder="Society Admin Contact Number"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="society_admin_number"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {/* Password */}
-                <div className="relative">
-                  <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="password"
-                    name="society_admin_password"
-                    placeholder="Password"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="society_admin_password"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
-
-                {status?.error && (
-                  <div className="text-red-500 text-sm">{status.error}</div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || isLoading}
-                  className="w-full bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
-                >
-                  Next
-                </button>
-              </Form>
-            )}
-          </Formik>
         </div>
-      )}
+      </div>
 
-      {showTable && (
-        <>
-          <div className="card">
-            <DataTable
-              stripedRows
-              value={societyMembers}
-              editMode="row"
-              dataKey="id"
-              onRowEditComplete={onRowEditComplete}
-              tableStyle={{ minWidth: "50rem" }}
-              scrollable
-              scrollHeight="400px"
-            >
-              <Column
-                field="society_admin_name"
-                header="Name"
-                editor={(options) => textEditor(options)}
-                style={{ width: "20%" }}
-                sortable
-              />
-              <Column
-                field="designation"
-                header="Designation"
-                body={statusBodyTemplate}
-                editor={(options) => statusEditor(options)}
-                style={{ width: "20%" }}
-                sortable
-              />
-              <Column
-                field="society_admin_number"
-                header="Mobile Number"
-                editor={(options) => textEditor(options)}
-                style={{ width: "20%" }}
-                sortable
-              />
-              <Column
-                rowEditor={allowEdit}
-                headerStyle={{ width: "10%", minWidth: "8rem" }}
-                bodyStyle={{ textAlign: "center" }}
-                sortable
-              ></Column>
-            </DataTable>
-            <button
-              onClick={() => setshowAddMore(true)}
-              className="text-blue-600 pt-2 ml-3 text-sm hover:underline cursor-pointer"
-            >
-              Add More
-            </button>
-          </div>
-          <div onClick={handleProceed} className="fixed bottom-4 right-4">
-            <button className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600">
-              Proceed
-            </button>
-          </div>
-        </>
-      )}
+      <div className="w-full flex items-center justify-center">
+        <div className="w-full max-w-4xl mx-auto px-6">
+          {/* form */}
+          {!showTable && (
+            <div className=" w-full max-w-md bg-white p-8 rounded-lg ">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold mb-2">Sign Up</h1>
+                <h4 className="mb-6 text-gray-700 font-medium">
+                  Please enter your details
+                </h4>
+              </div>
 
-      <div className="card flex justify-content-center">
-        <Dialog
-          header="Add Society Member"
-          visible={showAddMore}
-          style={{ width: "50vw" }}
-          onHide={() => setshowAddMore(false)}
-        >
-          <Formik
-            initialValues={initialValuesOfMembers}
-            validationSchema={validationSchemaOfMembers}
-            onSubmit={handleSubmitOfMembers}
-          >
-            {({ isSubmitting, status }) => (
-              <Form className="space-y-4">
-                {/* Member Name */}
-                <div className="relative">
-                  <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="name"
-                    placeholder=" Name"
-                    className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
-                  />
-                  <ErrorMessage
-                    name="name"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+              <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmit}
+                
+              >
+                {({ values, isSubmitting, setFieldValue, status, getFieldProps }) => (
+                  <Form className="space-y-4">
+                    {/* Society Name */}
+                    <div className="relative">
+                      <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        {...getFieldProps("society_name")}
+                        placeholder="Society Name"
+                        className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
+                        
+                      />
+                      <ErrorMessage
+                        name="society_name"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {/* Society Address */}
+                    <div className="relative">
+                      <FaHome className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="society_address"
+                        placeholder="Society Address"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="society_address"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {/* Society Logo */}
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0] || null;
+                          setFieldValue("society_logo", file);
+                          setLogoPreview(
+                            file ? URL.createObjectURL(file) : null
+                          );
+                        }}
+                        className="w-full border-gray-300 rounded-md p-2 border-b"
+                      />
 
-                {/* Member Designation */}
-                <div className="relative">
-                  <Dropdown
-                    value={selectedDesignation}
-                    onChange={(e) => setSelectedDesignation(e.value)}
-                    options={designationOptions}
-                    optionLabel="label"
-                    placeholder="Select a Designation"
-                    className="w-full md:w-14rem"
-                  />
-                  <ErrorMessage
-                    name="designation"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+                      {values.society_logo && (
+                        <p className="mt-1 text-gray-600 text-sm">
+                          {values.society_logo.name}
+                        </p>
+                      )}
+                      {logoPreview && (
+                        <img
+                          src={logoPreview}
+                          alt="Preview"
+                          className="mt-2 h-16 w-16 object-cover rounded"
+                        />
+                      )}
 
-              {/* House Number  */}
-                {selectedDesignation === "HOUSE OWNER" && (
-                  <div className="relative">
-                    <FaHouse className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                    <Field
-                      type="text"
-                      name="house_no"
-                      placeholder=" House/Flat Number"
-                      className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                    />
-                    <ErrorMessage
-                      name="house_no"
-                      component="div"
-                      className="text-red-500 text-sm mt-1"
-                    />
-                  </div>
+                      <ErrorMessage
+                        name="society_logo"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {/* Builder Name */}
+                    <div className="relative">
+                      <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="builder_name"
+                        placeholder="Builder Name"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="builder_name"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {/* Builder Number */}
+                    <div className="relative">
+                      <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="builder_number"
+                        placeholder="Builder Contact Number"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="builder_number"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {/* Society Admin Name */}
+                    <div className="relative">
+                      <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="society_admin_name"
+                        placeholder="Society Admin name"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="society_admin_name"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {/* Society Admin Number */}
+                    <div className="relative">
+                      <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="society_admin_number"
+                        placeholder="Society Admin Contact Number"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="society_admin_number"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* society admin email */}
+                    <div className="relative">
+                      <MdEmail className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="society_admin_email"
+                        placeholder="Society Admin Email"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="society_admin_email"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* Password */}
+                    <div className="relative">
+                      <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="password"
+                        name="society_admin_password"
+                        placeholder="Password"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="society_admin_password"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+                    {status?.error && (
+                      <div className="text-red-500 text-sm">{status.error}</div>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || isLoading}
+                      className="w-full bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
+                    >
+                      Next
+                    </button>
+                  </Form>
                 )}
+              </Formik>
+            </div>
+          )}
 
-                {/* Member Number */}
-                <div className="relative">
-                  <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="text"
-                    name="mobile_no"
-                    placeholder=" Contact Number"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+          {/* table */}
+          {showTable && (
+            <>
+              <div className="card">
+                <DataTable
+                  stripedRows
+                  value={societyMembers}
+                  editMode="row"
+                  dataKey="id"
+                  onRowEditComplete={onRowEditComplete}
+                  tableStyle={{ minWidth: "50rem" }}
+                  scrollable
+                  scrollHeight="400px"
+                >
+                  <Column
+                    field="society_admin_name"
+                    header="Name"
+                    editor={(options) => textEditor(options)}
+                    style={{ width: "20%" }}
+                    sortable
                   />
-                  <ErrorMessage
-                    name="mobile_no"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
+                  <Column
+                    field="designation"
+                    header="Designation"
+                    body={statusBodyTemplate}
+                    editor={(options) => statusEditor(options)}
+                    style={{ width: "20%" }}
+                    sortable
                   />
-                </div>
+                  <Column
+                    field="society_admin_number"
+                    header="Mobile Number"
+                    editor={(options) => textEditor(options)}
+                    style={{ width: "20%" }}
+                    sortable
+                  />
+                  <Column
+                    rowEditor={allowEdit}
+                    headerStyle={{ width: "10%", minWidth: "8rem" }}
+                    bodyStyle={{ textAlign: "center" }}
+                    sortable
+                  ></Column>
+                </DataTable>
+                <button
+                  onClick={() => setshowAddMore(true)}
+                  className="text-blue-600 pt-2 ml-3 text-sm hover:underline cursor-pointer"
+                >
+                  Add More
+                </button>
+              </div>
+              <div onClick={handleProceed} className="fixed bottom-4 right-4">
+                <button className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600">
+                  Proceed
+                </button>
+              </div>
+            </>
+          )}
 
-                {/* Member Password */}
-                <div className="relative">
-                  <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                  <Field
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
-                  />
-                  <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                  />
-                </div>
+          {/* Pop up */}
+          <div className="card flex justify-content-center">
+            <Dialog
+              header="Add Society Member"
+              visible={showAddMore}
+              style={{ width: "50vw" }}
+              onHide={() => setshowAddMore(false)}
+            >
+              <Formik
+                initialValues={initialValuesOfMembers}
+                validationSchema={validationSchemaOfMembers}
+                onSubmit={handleSubmitOfMembers}
+              >
+                {({ isSubmitting, status }) => (
+                  <Form className="space-y-4">
+                    {/* Member Name */}
+                    <div className="relative">
+                      <MdDriveFileRenameOutline className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="name"
+                        placeholder=" Name"
+                       
+                        className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
+                      />
+                      <ErrorMessage
+                        name="name"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
 
-                {status?.error && (
-                  <div className="text-red-500 text-sm">{status.error}</div>
+                    {/* Member Designation */}
+                    <div className="relative">
+                      <Dropdown
+                        value={selectedDesignation}
+                        onChange={(e) => setSelectedDesignation(e.value)}
+                        options={designationOptions}
+                        optionLabel="label"
+                        placeholder="Select a Designation"
+                        className="w-full md:w-14rem"
+                      />
+                      <ErrorMessage
+                        name="designation"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* Member email */}
+                    <div className="relative">
+                      <MdEmail className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="email"
+                        placeholder=" Email"
+                        className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* House Number  */}
+                    {selectedDesignation === "HOUSE OWNER" && (
+                      <div className="relative">
+                        <FaHouse className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                        <Field
+                          type="text"
+                          name="house_no"
+                          placeholder=" House/Flat Number"
+                          className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                        />
+                        <ErrorMessage
+                          name="house_no"
+                          component="div"
+                          className="text-red-500 text-sm mt-1"
+                        />
+                      </div>
+                    )}
+
+                    {/* Member Number */}
+                    <div className="relative">
+                      <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="text"
+                        name="mobile_no"
+                        placeholder=" Contact Number"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="mobile_no"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {/* Member Password */}
+                    <div className="relative">
+                      <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                      <Field
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        className="w-full border-gray-300 rounded-md pl-10 py-2 border-b"
+                      />
+                      <ErrorMessage
+                        name="password"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    </div>
+
+                    {status?.error && (
+                      <div className="text-red-500 text-sm">{status.error}</div>
+                    )}
+
+                    {/* button */}
+                    <div className="text-center">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-10  bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </Form>
                 )}
-
-                {/* button */}
-                <div className="text-center">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-10  bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600"
-                  >
-                    Save
-                  </button>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        </Dialog>
+              </Formik>
+            </Dialog>
+          </div>
+          
+        </div>
       </div>
     </div>
   );

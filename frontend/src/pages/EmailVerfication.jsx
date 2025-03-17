@@ -1,0 +1,38 @@
+import { SiTicktick } from "react-icons/si";
+
+const EmailVerification = () => {
+  return (
+    <div className="flex text-center items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <SiTicktick className="w-10 h-10 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-bold mb-4">
+            Thank you for signing in
+          </h1>
+
+          <h2 className="text-xl font-semibold mb-4">
+            Verify your email address
+          </h2>
+
+          <p className="text-gray-500 mb-8">
+            Please confirm that you want to use this as your email address.
+          </p>
+
+          <button className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-md font-medium mb-8">
+            Verify my email
+          </button>
+
+          <div className="flex justify-center space-x-6">
+            <a href="#" className="text-gray-400 hover:text-gray-600"></a>
+            <a href="#" className="text-gray-400 hover:text-gray-600"></a>
+            <a href="#" className="text-gray-400 hover:text-gray-600"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EmailVerification;

@@ -3,7 +3,7 @@ const { encrypt, decrypt } = require("../auth/auth.js"); // Assuming these are d
 
 // Define the member schema
 const member_data = new mongoose.Schema({
-    id_Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },  // Use mongoose.Schema for ObjectId
+    id_Admin: { type: String },  // Use mongoose.Schema for ObjectId
     name: { type: String },
     mobile_number: { type: String },
     designation: { type: String },

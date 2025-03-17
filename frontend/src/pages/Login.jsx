@@ -4,6 +4,7 @@ import { IoLockClosedSharp } from "react-icons/io5";
 import { FaPhoneAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../services/ApiService";
+import LoginImage from "../assets/LoginImage.jpg"; 
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,73 +45,78 @@ const Login = () => {
       setSubmitting(false);
     }
   };
-  return (
-    <div className="flex items-center justify-center h-screen bg-white">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg ">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Sign in into your account</h1>
-          <h4 className="mb-6 text-gray-700 font-medium">
-            Please enter your email and password
-          </h4>
-        </div>
 
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting }) => (
-            <Form className="space-y-4">
-              <div className="relative contact numer">
-                <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                <Field
-                  type="contact_number"
-                  id="contact_number"
-                  name="contact_number"
-                  placeholder="Mobile Number"
-                  className="w-full border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500 pl-10 py-2 border-b"
-                />
-                <ErrorMessage
-                  name="contact_number"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
-              <div className="relative mb-15 password">
-                <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
-                <Field
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Password"
-                  className="w-full border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500 pl-10 py-2 border-b"
-                />
-                <ErrorMessage
-                  name="password"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+  return (
+    <div className="flex h-screen">
+      <div className="w-1/2 bg-cover bg-center" style={{ backgroundImage: `url(${LoginImage})` }}>
+      </div>
+      <div className="w-1/2 flex items-center justify-center bg-white">
+        <div className="w-full max-w-md bg-white p-8 rounded-lg">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Sign in into your account</h1>
+            <h4 className="mb-6 text-gray-700 font-medium">
+              Please enter your email and password
+            </h4>
+          </div>
+
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting }) => (
+              <Form className="space-y-4">
+                <div className="relative contact numer">
+                  <FaPhoneAlt className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                  <Field
+                    type="contact_number"
+                    id="contact_number"
+                    name="contact_number"
+                    placeholder="Mobile Number"
+                    className="w-full border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500 pl-10 py-2 border-b"
+                  />
+                  <ErrorMessage
+                    name="contact_number"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+                <div className="relative mb-15 password">
+                  <IoLockClosedSharp className="absolute top-1/2 transform -translate-y-1/2 left-3 text-gray-400" />
+                  <Field
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Password"
+                    className="w-full border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500 pl-10 py-2 border-b"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Login
+                </button>
+              </Form>
+            )}
+          </Formik>
+          <div className="text-center mt-6 text-lg">
+            <p className="text-gray-700 cursor-pointer">
+              Don&lsquo;t have an account?
+              <a
+                onClick={() => navigate("/signup")}
+                className="text-blue-500 hover:underline"
               >
-                Login
-              </button>
-            </Form>
-          )}
-        </Formik>
-        <div className="text-center mt-6 text-lg">
-          <p className="text-gray-700 cursor-pointer">
-            Don&lsquo;t have an account?
-            <a
-              onClick={() => navigate("/signup")}
-              className="text-blue-500 hover:underline"
-            >
-              Sign Up
-            </a>
-          </p>
+                Sign Up
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
