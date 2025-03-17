@@ -32,42 +32,35 @@ const upload = multer({
 
 async function mailVerify(email, token) {
     const transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
+        host: "smtp.gmail.com",
+        port: 587,  // Use 465 for SSL, 587 for TLS
         secure: false,
         auth: {
-            user: "yesx9999@gmail.com",
-            pass: "ooni pnae ajuk bnpu",
-        },
+            user: process.env.EMAIL_USER,  // Ensure this is set in .env
+            pass: process.env.EMAIL_PASS  // Ensure this is set in .env
+        }
     });
 
-    // Backend API where the token will be verified
     const verificationEndpoint = "https://yourdomain.com/api/verify";
 
-    // HTML email with a POST request using a form
     const emailHtml = `
         <p>Click the button below to verify your email:</p>
-        <form action="${verificationEndpoint}" method="POST">
-            <input type="hidden" name="token" value="${token}" />
-            <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer;">
-                Verify Email
-            </button>
-        </form>
+        <a href="${verificationEndpoint}?token=${token}" style="background: #28a745; color: white; padding: 10px 15px; text-decoration: none;">
+            Verify Email
+        </a>
     `;
 
-    // Send email
     const info = await transporter.sendMail({
-        from: '"Your App Name" <no-reply@yourdomain.com>',
+        from: `"Your App Name" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Verify Your Email",
-        text: `Please verify your email by clicking the link below: ${verificationEndpoint}`,
+        text: `Verify your email by clicking: ${verificationEndpoint}?token=${token}`,
         html: emailHtml,
     });
 
-    console.log("Verification email sent: %s", info.messageId);
+    console.log("Verification email sent:", info.messageId);
     return info;
 }
-
 
 // Signup Route
 router.post('/signup', upload.single('photo'), async (req, res) => {
