@@ -130,34 +130,34 @@ const SignUp = () => {
     resetForm();
   };
 
-    const handleProceed = async () => {
-      const formData = new FormData();
+  const handleProceed = async () => {
+    const formData = new FormData();
 
-      if (formValues.society_logo) {
-        formData.append("Society logo", formValues.society_logo);
-      }
-      formData.append("Society name", formValues.society_name);
-      formData.append("Society address", formValues.society_address);
-      formData.append("builder name", formValues.builder_name);
-      formData.append("builder number", formValues.builder_number);
-      formData.append("Society admin name", formValues.society_admin_name);
-      formData.append("Society admin number", formValues.society_admin_number);
-      formData.append("Society admin email", formValues.society_admin_email);
-      formData.append(
-        "Society admin password",
-        formValues.society_admin_password
-      );
-      formData.append("Role", "Society Admin");
+    if (formValues.society_logo) {
+      formData.append("photo", formValues.society_logo);
+    }
+    formData.append("society_name", formValues.society_name);
+    formData.append("society_address", formValues.society_address);
+    formData.append("builder_name", formValues.builder_name);
+    formData.append("builder_number", formValues.builder_number);
+    formData.append("society_admin_name", formValues.society_admin_name);
+    formData.append("society_admin_number", formValues.society_admin_number);
+    formData.append("society_admin_email", formValues.society_admin_email);
+    formData.append(
+      "society_admin_password",
+      formValues.society_admin_password
+    );
+    formData.append("Role", "Society Admin");
 
-      const formattedMembers = societyMembers.slice(1).map((member) => ({
-        name: member.society_admin_name,
-        mobile_number: member.society_admin_number,
-        designation: member.designation,
-        password: member.password,
-        email: member.email,
-        ...(member.house_number ? { house_number: member.house_number } : {}),
-      }));
-      formData.append("society_members", JSON.stringify(formattedMembers));
+    const formattedMembers = societyMembers.slice(1).map((member) => ({
+      name: member.society_admin_name,
+      mobile_number: member.society_admin_number,
+      designation: member.designation,
+      password: member.password,
+      email: member.email,
+      ...(member.house_number ? { house_number: member.house_number } : {}),
+    }));
+    formData.append("society_members", JSON.stringify(formattedMembers));
 
     try {
       const result = await signup(formData).unwrap();
@@ -288,9 +288,14 @@ const SignUp = () => {
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
-                
               >
-                {({ values, isSubmitting, setFieldValue, status, getFieldProps }) => (
+                {({
+                  values,
+                  isSubmitting,
+                  setFieldValue,
+                  status,
+                  getFieldProps,
+                }) => (
                   <Form className="space-y-4">
                     {/* Society Name */}
                     <div className="relative">
@@ -300,7 +305,6 @@ const SignUp = () => {
                         {...getFieldProps("society_name")}
                         placeholder="Society Name"
                         className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
-                        
                       />
                       <ErrorMessage
                         name="society_name"
@@ -545,7 +549,6 @@ const SignUp = () => {
                         type="text"
                         name="name"
                         placeholder=" Name"
-                       
                         className="w-full border-b rounded-md pl-10 py-2 border-gray-300"
                       />
                       <ErrorMessage
@@ -657,7 +660,6 @@ const SignUp = () => {
               </Formik>
             </Dialog>
           </div>
-          
         </div>
       </div>
     </div>

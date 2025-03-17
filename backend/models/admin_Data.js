@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');  // ✅ Correct spelling
-const { encrypt, decrypt } = require("../auth/auth.js");  // ✅ Ensure auth.js exists
+const mongoose = require('mongoose');
+const { encrypt, decrypt } = require("../auth/auth.js");
 
-const admin_data = new mongoose.Schema({
+const adminSchema = new mongoose.Schema({
     society_name: { type: String },
     society_address: { type: String },
     society_logo: { type: String },
@@ -9,18 +9,23 @@ const admin_data = new mongoose.Schema({
     builder_number: { type: String },
     society_admin_name: { type: String },
     society_admin_number: { type: String },
+    society_admin_email: { type: String },
     society_admin_password: {
         type: String,
-        set: encrypt, // Encrypt the password before saving
-        get: decrypt
+        set: function (value) {
+            return value ? encrypt(value) : undefined; // Encrypt only if value exists
+        },
+        get: function (value) {
+            return value ? decrypt(value) : undefined; // Decrypt only if value exists
+        }
     },
     designation: { type: String }
 });
 
-// ✅ Move schema configuration before defining model
-admin_data.set('toObject', { getters: true });
-admin_data.set('toJSON', { getters: true });
+// Apply schema configuration
+adminSchema.set('toObject', { getters: true });
+adminSchema.set('toJSON', { getters: true });
 
-const Admin_Data = mongoose.model('Admin_Data', admin_data);
+const Admin_Data = mongoose.model('Admin_Data', adminSchema);
 
 module.exports = Admin_Data;

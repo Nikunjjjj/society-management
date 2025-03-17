@@ -1,25 +1,30 @@
-const mongoose = require('mongoose');  // ✅ Correct spelling
-const { encrypt, decrypt } = require("../auth/auth.js"); // Assuming these are defined properly in your auth.js
+const mongoose = require('mongoose');
+const { encrypt, decrypt } = require("../auth/auth.js");
 
 // Define the member schema
-const member_data = new mongoose.Schema({
-    id_Admin: { type: String },  // Use mongoose.Schema for ObjectId
-    name: { type: String },
-    mobile_number: { type: String },
+const memberSchema = new mongoose.Schema({
+    id_Admin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin_Data' }, // Reference Admin model
+    name: { type: String, required: true },
+    mobile_number: { type: String, required: true },
     designation: { type: String },
     house_number: { type: String },
     password: {
         type: String,
-        set: encrypt, // Encrypt the password before saving
-        get: decrypt, // Decrypt the password when accessing it
+        set: function (value) {
+            return value ? encrypt(value) : undefined; // Encrypt only if value exists
+        },
+        get: function (value) {
+            return value ? decrypt(value) : undefined; // Decrypt only if value exists
+        }
     },
+    email: { type: String, required: true, unique: true }
 });
 
-// Add getters to the schema to apply the `get` function (decryption) when the object is converted to JSON
-member_data.set('toObject', { getters: true });
-member_data.set('toJSON', { getters: true });
+// Apply schema configuration for getters
+memberSchema.set('toObject', { getters: true });
+memberSchema.set('toJSON', { getters: true });
 
 // Create the model from the schema
-const Memmber = mongoose.model('Memmber', member_data);  // Define the Memmber model
+const Member = mongoose.model('Member', memberSchema);
 
-module.exports = Memmber;
+module.exports = Member;
