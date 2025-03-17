@@ -177,8 +177,12 @@ router.get('/verify', async (req, res) => {
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
 
+        console.log('Decoded token:', decoded);
+        const objectaDMINId = new mongoose.Types.ObjectId(decoded.id);
+
         // Find admin and update verification status
-        const admin = await Admin_Data.findOne({ society_admin_email: decoded.email });
+        const admin = await Admin_Data.findOneAndUpdate({ _id: objectaDMINId, society_admin_email: decoded.email }, { verified: true });
+
         if (!admin) {
             return res.status(404).json({ message: 'Admin not found' });
         }

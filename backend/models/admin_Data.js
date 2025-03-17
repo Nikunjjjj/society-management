@@ -19,7 +19,9 @@ const adminSchema = new mongoose.Schema({
             return value ? decrypt(value) : undefined; // Decrypt only if value exists
         }
     },
-    designation: { type: String }
+    designation: { type: String },
+    varified: { type: Boolean, default: false }
+
 });
 
 // Apply schema configuration
