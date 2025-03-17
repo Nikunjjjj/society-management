@@ -11,7 +11,11 @@ const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "*", // Change this to your frontend URL if needed (e.g., "http://localhost:3000")
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization"
+}));
 
 // Debugging: Check if MongoDB URI is loaded
 console.log("MongoDB URI:", process.env.MONGODB_URI);
