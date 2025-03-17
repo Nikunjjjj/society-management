@@ -42,14 +42,19 @@ async function mailVerify(email, token) {
         }
     });
 
-    const verificationEndpoint = "https://yourdomain.com/api/verify";
+    const verificationEndpoint = "http://localhost:5000/verify";
 
     const emailHtml = `
-        <p>Click the button below to verify your email:</p>
-        <a href="${verificationEndpoint}?token=${token}" style="background: #28a745; color: white; padding: 10px 15px; text-decoration: none;">
-            Verify Email
-        </a>
-    `;
+    <p>Click the button below to verify your email:</p>
+    <a href="${verificationEndpoint}?token=${token}" 
+        style="display: inline-block; background: #28a745; color: white; padding: 10px 15px; 
+        text-decoration: none; border-radius: 5px;">
+        Verify Email
+    </a>
+
+    <p>If the button doesn’t work, copy and paste the following URL into your browser:</p>
+    <p><strong>${verificationEndpoint}?token=${token}</strong></p>
+`;
 
     const info = await transporter.sendMail({
         from: `"Your App Name" <${process.env.EMAIL_USER}>`,
@@ -158,4 +163,39 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+router.get('/verify', async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({ message: 'Verification token is missing' });
+        }
+
+        // Verify JWT token
+        const decoded = jwt.verify(token, secretKey);
+        if (!decoded || !decoded.email) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Find admin and update verification status
+        const admin = await Admin_Data.findOne({ society_admin_email: decoded.email });
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        if (admin.verified) {
+            return res.status(400).json({ message: 'Email already verified' });
+        }
+
+        admin.verified = true;
+        await admin.save();
+
+        res.status(200).json({ message: 'Email verified successfully' });
+
+    } catch (error) {
+        console.error('Email verification failed:', error);
+        res.status(500).json({ message: 'Verification failed. Invalid or expired token' });
+    }
+});
+
 module.exports = router;
