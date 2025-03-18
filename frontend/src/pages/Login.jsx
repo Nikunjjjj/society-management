@@ -110,7 +110,7 @@ const Login = () => {
             <p className="text-gray-700 cursor-pointer">
               Don&lsquo;t have an account?
               <a
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/dashboard")}
                 className="text-blue-500 hover:underline"
               >
                 Sign Up
