@@ -31,11 +31,10 @@ const upload = multer({
 
 
 async function mailVerify(email, token) {
-
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,  // Use 465 for SSL, 587 for TLS
-        secure: false,
+        secure: false,  // true for 465, false for other ports
         auth: {
             user: process.env.EMAIL_USER,  // Ensure this is set in .env
             pass: process.env.EMAIL_PASS  // Ensure this is set in .env
@@ -54,19 +53,25 @@ async function mailVerify(email, token) {
 
     <p>If the button doesn’t work, copy and paste the following URL into your browser:</p>
     <p><strong>${verificationEndpoint}?token=${token}</strong></p>
-`;
+    `;
 
-    const info = await transporter.sendMail({
-        from: `"Your App Name" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Verify Your Email",
-        text: `Verify your email by clicking: ${verificationEndpoint}?token=${token}`,
-        html: emailHtml,
-    });
+    try {
+        const info = await transporter.sendMail({
+            from: `"Your App Name" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "Verify Your Email",
+            text: `Verify your email by clicking: ${verificationEndpoint}?token=${token}`,
+            html: emailHtml,
+        });
 
-    console.log("Verification email sent:", info.messageId);
-    return info;
+        console.log("Verification email sent:", info.messageId);
+        return info;
+    } catch (error) {
+        console.error("Error sending email:", error);
+        throw error; // Re-throw the error if needed
+    }
 }
+
 
 // Signup Route
 router.post('/signup', upload.single('photo'), async (req, res) => {
@@ -75,28 +80,27 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
         console.log("Request body:", req.body);
         console.log("Uploaded file:", req.file);
 
-        if (!req.file) {
-            return res.status(400).json({ message: "File not uploaded. Ensure field name is 'photo'." });
-        }
-
         // Upload file to Supabase
-        const fileName = `society-logos/${Date.now()}-${req.file.originalname}`;
-        const { data, error } = await supabase.storage
-            .from("pdfurl")
-            .upload(fileName, req.file.buffer, {
-                contentType: req.file.mimetype,
-                cacheControl: "3600",
-                upsert: false,
-            });
+        let main_url_logo = ""
+        if (req.file) {
+            const fileName = `society-logos/${Date.now()}-${req.file.originalname}`;
+            const { data, error } = await supabase.storage
+                .from("pdfurl")
+                .upload(fileName, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                    cacheControl: "3600",
+                    upsert: false,
+                });
 
-        if (error) {
-            console.error("Supabase Upload Error:", error);
-            return res.status(500).json({ message: "File upload failed", error });
+            if (error) {
+                console.error("Supabase Upload Error:", error);
+                return res.status(500).json({ message: "File upload failed", error });
+            }
+
+            const publicUrl = supabase.storage.from("pdfurl").getPublicUrl(fileName)
+            console.log("File uploaded successfully:", publicUrl);
+            const main_url_logo = JSON.stringify(publicUrl.data.publicUrl);
         }
-
-        const publicUrl = supabase.storage.from("pdfurl").getPublicUrl(fileName)
-        console.log("File uploaded successfully:", publicUrl);
-        const main_url_logo = JSON.stringify(publicUrl.data.publicUrl);
         // Parse society members safely
         let societyMembers = [];
         try {
@@ -153,10 +157,6 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
             });
 
         res.status(201).json({ message: "Signup successful" });
-
-
-
-
 
     } catch (err) {
         console.error("Signup Error:", err);
