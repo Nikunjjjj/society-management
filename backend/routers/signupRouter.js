@@ -82,7 +82,7 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
 
         // Upload file to Supabase
         let main_url_logo = ""
-        if (req.file) {
+        if (req.file != null) {
             const fileName = `society-logos/${Date.now()}-${req.file.originalname}`;
             const { data, error } = await supabase.storage
                 .from("pdfurl")
