@@ -119,6 +119,7 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
             builder_number: req.body.builder_number,
             society_admin_name: req.body.society_admin_name,
             society_admin_email: req.body.society_admin_email,
+            society_admin_number: req.body.society_admin_number,
             society_admin_password: req.body.society_admin_password,
             designation: req.body.Role,
         });
