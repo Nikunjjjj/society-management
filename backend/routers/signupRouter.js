@@ -99,7 +99,7 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
 
             const publicUrl = supabase.storage.from("pdfurl").getPublicUrl(fileName)
             console.log("File uploaded successfully:", publicUrl);
-            const main_url_logo = JSON.stringify(publicUrl.data.publicUrl);
+            main_url_logo = JSON.stringify(publicUrl.data.publicUrl);
         }
         // Parse society members safely
         let societyMembers = [];

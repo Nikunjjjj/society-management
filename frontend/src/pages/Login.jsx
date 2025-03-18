@@ -46,7 +46,6 @@ const Login = () => {
         draggable: true,
         theme: "colored",
       });
-
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);

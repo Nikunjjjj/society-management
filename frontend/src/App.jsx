@@ -7,7 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
-  const token = localStorage.getItem("token");
+ 
 
   return (
     <div>
@@ -18,11 +18,10 @@ const App = () => {
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/emailverification" element={<EmailVerification />} />
-          {token ? (
-            <Route path="/dashboard" element={<Dashboard />} />
-          ) : (
-            <Route path="/signup" element={<SignUp />} />
-          )}
+
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
       </BrowserRouter>
     </div>
