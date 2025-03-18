@@ -19,16 +19,6 @@ const EmailVerification = () => {
           <p className="text-gray-500 mb-8">
             Please confirm that you want to use this as your email address.
           </p>
-
-          <button className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-md font-medium mb-8">
-            Verify my email
-          </button>
-
-          <div className="flex justify-center space-x-6">
-            <a href="#" className="text-gray-400 hover:text-gray-600"></a>
-            <a href="#" className="text-gray-400 hover:text-gray-600"></a>
-            <a href="#" className="text-gray-400 hover:text-gray-600"></a>
-          </div>
         </div>
       </div>
     </div>
