@@ -212,7 +212,7 @@ router.post('/login', async (req, res) => {
                 error: 'You must provide a body',
             })
         }
-        if (!body.society_admin_email || !body.society_admin_password) {
+        if (!body.society_admin_number || !body.society_admin_password) {
             return res.status(400).json({
                 success: false,
                 error: 'You must provide a email and password',
@@ -234,7 +234,7 @@ router.post('/login', async (req, res) => {
         if (user.society_admin_password !== body.society_admin_password) { // Ensure decryption matches
             return res.status(401).json({ message: "Incorrect password" });
         }
-        const token = jwt.sign({ id: user._id.toString(), email: society_admin_email }, secretKey, { expiresIn: '30000s' });
+        const token = jwt.sign({ id: user._id.toString(), email: user.society_admin_email }, secretKey, { expiresIn: '30000s' });
         res.status(200).json({
             success: true,
             token: token,
