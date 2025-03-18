@@ -16,6 +16,7 @@ import { Dialog } from "primereact/dialog";
 import { FaHouse } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import SignUpImage from "../../assets/SignUpImage.jpg";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -166,12 +167,31 @@ const SignUp = () => {
       if (result.token) {
         localStorage.setItem("token", result.token);
       }
+      // Show success toast
+      toast.success("Signup successful!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
       navigate("/emailverification");
     } catch (error) {
       console.error("Signup failed:", error);
       setStatus({
         error:
           error.data?.message || "Failed to create account. Please try again.",
+      });
+      toast.error("Signup failed! Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
       });
     }
   };
