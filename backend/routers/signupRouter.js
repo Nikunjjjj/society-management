@@ -45,15 +45,16 @@ async function mailVerify(email, token) {
 
     const emailHtml = `
     <p>Click the button below to verify your email:</p>
-    <a href="${verificationEndpoint}?token=${token}" 
+    <p><strong>Copy and paste this token into the verification page:</strong></p>
+    <p><strong>${token}</strong></p>
+
+    <p>Or visit the following page to complete your verification:</p>
+    <a href="http://http://localhost:5173/verify?token=${token}" 
         style="display: inline-block; background: #28a745; color: white; padding: 10px 15px; 
         text-decoration: none; border-radius: 5px;">
         Verify Email
     </a>
-
-    <p>If the button doesn’t work, copy and paste the following URL into your browser:</p>
-    <p><strong>${verificationEndpoint}?token=${token}</strong></p>
-    `;
+`;
 
     try {
         const info = await transporter.sendMail({
@@ -164,44 +165,56 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
-router.get('/verify', async (req, res) => {
+router.put('/verify', async (req, res) => {
     try {
-        const { token } = req.query;
+        const { token } = req.body;
 
         if (!token) {
-            return res.status(400).json({ message: 'Verification token is missing' });
+            return res.status(400).json({ message: 'Verification token is required.' });
         }
 
         // Verify JWT token
-        const decoded = jwt.verify(token, secretKey);
-        if (!decoded || !decoded.email) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
+        let decoded;
+        try {
+            decoded = jwt.verify(token, secretKey);
+        } catch (err) {
+            console.error('Invalid or expired token:', err.message);
+            return res.status(400).json({ message: 'Invalid or expired token.' });
+        }
+
+        if (!decoded || !decoded.id || !decoded.email) {
+            return res.status(400).json({ message: 'Token is missing required information.' });
         }
 
         console.log('Decoded token:', decoded);
-        const objectaDMINId = new mongoose.Types.ObjectId(decoded.id);
 
-        // Find admin and update verification status
-        const admin = await Admin_Data.findOneAndUpdate({ _id: objectaDMINId, society_admin_email: decoded.email }, { verified: true });
-        console.log('Admin:', admin);
+        // Convert decoded ID to MongoDB ObjectId
+        const adminId = new mongoose.Types.ObjectId(decoded.id);
+        console.log('Admin ID:', adminId);
+
+        // Find admin by ID
+        const admin = await Admin_Data.findById(adminId);
+
         if (!admin) {
-            return res.status(404).json({ message: 'Admin not found' });
+            return res.status(404).json({ message: 'Admin not found.' });
         }
 
         if (admin.verified) {
-            return res.status(400).json({ message: 'Email already verified' });
+            return res.status(400).json({ message: 'Email is already verified.' });
         }
 
+        // Update verification status
         admin.verified = true;
-        await admin.save();
+        await admin.save().then(() => console.log('Admin verified:', admin));
 
-        res.status(200).json({ message: 'Email verified successfully' });
+        res.status(200).json({ message: 'Email verified successfully.' });
 
     } catch (error) {
-        console.error('Email verification failed:', error);
-        res.status(500).json({ message: 'Verification failed. Invalid or expired token' });
+        console.error('Email verification error:', error);
+        res.status(500).json({ message: 'An error occurred during verification.' });
     }
 });
+
 
 // Login Route
 router.post('/login', async (req, res) => {
