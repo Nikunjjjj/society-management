@@ -45,16 +45,15 @@ async function mailVerify(email, token) {
 
     const emailHtml = `
     <p>Click the button below to verify your email:</p>
-    <p><strong>Copy and paste this token into the verification page:</strong></p>
-    <p><strong>${token}</strong></p>
-
-    <p>Or visit the following page to complete your verification:</p>
-    <a href="http://http://localhost:5173/verify?token=${token}" 
+    <a href="${verificationEndpoint}?token=${token}" 
         style="display: inline-block; background: #28a745; color: white; padding: 10px 15px; 
         text-decoration: none; border-radius: 5px;">
         Verify Email
     </a>
-`;
+
+    <p>If the button doesn’t work, copy and paste the following URL into your browser:</p>
+    <p><strong>${verificationEndpoint}?token=${token}</strong></p>
+    `;
 
     try {
         const info = await transporter.sendMail({
@@ -165,9 +164,9 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
-router.put('/verify', async (req, res) => {
+router.get('/verify', async (req, res) => {
     try {
-        const { token } = req.body;
+        const { token } = req.query;
 
         if (!token) {
             return res.status(400).json({ message: 'Verification token is required.' });
@@ -188,24 +187,33 @@ router.put('/verify', async (req, res) => {
 
         console.log('Decoded token:', decoded);
 
-        // Convert decoded ID to MongoDB ObjectId
-        const adminId = new mongoose.Types.ObjectId(decoded.id);
-        console.log('Admin ID:', adminId);
+        // // Convert decoded ID to MongoDB ObjectId
+        // const adminId = new mongoose.Types.ObjectId(decoded.id);
+        // console.log('Admin ID:', adminId);
 
-        // Find admin by ID
-        const admin = await Admin_Data.findById(adminId);
+        // // Find admin by ID
+        // const admin = await Admin_Data.findById(adminId);
 
-        if (!admin) {
+        // if (!admin) {
+        //     return res.status(404).json({ message: 'Admin not found.' });
+        // }
+
+        // if (admin.verified) {
+        //     return res.status(400).json({ message: 'Email is already verified.' });
+        // }
+
+        const updatedAdmin = await Admin_Data.findByIdAndUpdate(
+            decoded.id,
+            { verified: true },
+            { new: true } // This option returns the updated document
+        );
+
+        if (!updatedAdmin) {
             return res.status(404).json({ message: 'Admin not found.' });
         }
 
-        if (admin.verified) {
-            return res.status(400).json({ message: 'Email is already verified.' });
-        }
+        console.log("Admin status updated successfully:", updatedAdmin);
 
-        // Update verification status
-        admin.verified = true;
-        await admin.save().then(() => console.log('Admin verified:', admin));
 
         res.status(200).json({ message: 'Email verified successfully.' });
 
