@@ -201,5 +201,42 @@ router.get('/verify', async (req, res) => {
         res.status(500).json({ message: 'Verification failed. Invalid or expired token' });
     }
 });
+router.post('/login', async (req, res) => {
+    try {
+        const body = req.body;
+        if (!body) {
+            return res.status(400).json({
+                success: false,
+                error: 'You must provide a body',
+            })
+        }
+        const user = await UserLogin.findOne({ email: req.body.email, name: req.body.name });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                error: 'User not found',
+            })
+        }
+        if (user.verified == false) {
+            return res.status(400).json({
+                success: false,
+                error: 'Your email has not been verified. Please verify your email and try again.'
+            })
+        }
+        const token = jwt.sign({ id: user._id.toString(), email: user.email }, secretKey, { expiresIn: '30000s' });
+        res.status(200).json({
+            success: true,
+            token: token,
+            user: user,
+            message: 'Login successful'
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            error,
+            message: 'Login failed',
+        })
+    }
+});
 
 module.exports = router;
