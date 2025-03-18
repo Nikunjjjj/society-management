@@ -204,10 +204,9 @@ router.get('/verify', async (req, res) => {
 
         const updatedAdmin = await Admin_Data.findByIdAndUpdate(
             decoded.id,
-            { verified: true },
+            { varified: true },
             { new: true } // This option returns the updated document
         );
-
         if (!updatedAdmin) {
             return res.status(404).json({ message: 'Admin not found.' });
         }
