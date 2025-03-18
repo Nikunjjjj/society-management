@@ -182,7 +182,7 @@ router.get('/verify', async (req, res) => {
 
         // Find admin and update verification status
         const admin = await Admin_Data.findOneAndUpdate({ _id: objectaDMINId, society_admin_email: decoded.email }, { verified: true });
-
+        console.log('Admin:', admin);
         if (!admin) {
             return res.status(404).json({ message: 'Admin not found' });
         }
