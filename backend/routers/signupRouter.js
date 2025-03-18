@@ -201,6 +201,8 @@ router.get('/verify', async (req, res) => {
         res.status(500).json({ message: 'Verification failed. Invalid or expired token' });
     }
 });
+
+// Login Route
 router.post('/login', async (req, res) => {
     try {
         const body = req.body;
